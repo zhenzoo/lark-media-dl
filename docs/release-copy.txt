@@ -1,0 +1,5 @@
+之前下载社交平台的视频和图文，经常要换解析网站。我把自己用的 media-dl 开源了：装成 Claude Code、Codex 或 Kimi 的个人 Skill，支持 YouTube、B站、小红书、X 视频和 Threads，文件直接进电脑 Downloads。
+
+想随手贴链接，就加上 lark-media-dl 的飞书妙搭网页：手机提交，电脑自动下载，日常不用开 AI 会话。默认不用 OSS，环境和账号配置有引导让你的 Agent 帮忙完成。
+
+https://github.com/zhenzoo/lark-media-dl

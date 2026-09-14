@@ -1,0 +1,73 @@
+Third-party notices
+===================
+
+lark-media-dl's original integration code is MIT licensed (see LICENSE).
+Dependencies are downloaded by package managers; their licenses remain those
+of their respective authors. No author account, private Skill installation,
+browser cookies, platform API secret or LLM credential is included.
+
+Python runtime
+--------------
+requests: Apache-2.0, https://github.com/psf/requests
+yt-dlp: Unlicense for its source; distributed builds and optional dependencies
+may carry additional terms. See https://github.com/yt-dlp/yt-dlp#license
+imageio-ffmpeg: BSD-2-Clause wrapper, https://github.com/imageio/imageio-ffmpeg
+FFmpeg binaries have their own LGPL/GPL terms depending on build options:
+https://ffmpeg.org/legal.html
+oss2 (optional): MIT, https://github.com/aliyun/aliyun-oss-python-sdk
+Do not assume this repository's MIT license relicenses external binaries.
+
+Miaoda application
+------------------
+The app is adapted from the author's Miaoda-generated personal workbench.
+Lark SDK packages, NestJS, React, Drizzle, Vite, Tailwind, Radix, Sonner and their
+transitive dependencies retain the licenses shipped in their installed packages.
+The exact dependency graph is apps/miaoda/package-lock.json.
+The platform SDK is a dependency, not a grant to redistribute platform services.
+Miaoda/Feishu account and service terms apply to users' own hosted deployments.
+
+The reusable UI files under apps/miaoda/client/src/components/ui follow the
+shadcn/ui component pattern. Its MIT notice is retained below.
+Source: https://github.com/shadcn-ui/ui
+License: https://github.com/shadcn-ui/ui/blob/main/LICENSE.md
+
+Brand icons
+-----------
+assets/logos/{youtube,bilibili,xiaohongshu,x,threads}.svg were retrieved from
+https://cdn.simpleicons.org/{brand} on 2026-09-14.
+Simple Icons: CC0-1.0, https://github.com/simple-icons/simple-icons
+License: https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md
+Brand trademarks and brand-specific usage guidelines are separate from CC0.
+Names/logos describe compatibility; they do not imply endorsement.
+
+Services and media
+------------------
+TikHub, FxTwitter and the source media platforms are external services.
+Their availability and rules may change independently of this code.
+Downloaded media is not relicensed by this repository.
+The README screenshot shows an actual deployment and a publicly shared
+maintainer post; it does not expose reusable credentials.
+
+shadcn/ui license
+----------------
+MIT License
+
+Copyright (c) 2023 shadcn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
