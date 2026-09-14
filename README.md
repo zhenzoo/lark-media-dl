@@ -56,6 +56,8 @@ python scripts/install_skill.py --agent codex --apply
 
 macOS/Linux 将解释器路径替换为 `.venv/bin/python`。支持 `--audio` 提取 MP3、`--meta-only` 查看信息、`--quality 720` 选择清晰度和 `-o` 指定目录。默认文件进入当前用户的 Downloads，同名文件自动避让，不覆盖已有文件。
 
+默认视频下载会把画面和原音轨合为一个 MP4；仅 `--audio` 单独输出 MP3。FFmpeg 不可用或合并后缺少应有音轨时报告失败，不把两个分离文件当作成片交付。
+
 **默认不需要飞书、OSS、大模型 API Key 或后台服务。** Threads 需要自己的 TikHub Key；其他平台按下表及真实下载结果补配置。配置模板是 [.env.example](.env.example)，具体注册和排错由 [安装引导](docs/SOP-010-agent-install.md) 带 Agent 逐项完成。
 
 ## 当前支持什么，需要哪些账号
@@ -88,6 +90,8 @@ TikHub 是部分平台的解析服务，**不是整个项目唯一依赖**。Pyt
 **Skill 给 Agent 用，网页给人直接操作。** 下载核心相同。网页提交后，Worker 这个常驻 Python 程序主动连接云端，不需要开放家庭网络的入站端口，也不调用大模型。
 
 默认 GUI 模式只把文件保存在电脑：即使手机打开网页提交任务，也不需要 OSS。想把完成的文件再下载到手机，才按需开启 OSS；多个文件提供 ZIP，电脑上仍保留平铺原文件。
+
+启用 OSS 交付后，保持网页打开，本标签页提交的任务完成时会自动下载到当前设备，无需再次点击。单个视频直接取回 MP4；图文等本来包含多个文件的结果才打包。历史任务不会自动重下，浏览器阻止自动下载时仍可使用任务旁的手动入口。
 
 ![实际部署的网页工作台：本地下载完成](assets/screenshots/workbench.png)
 

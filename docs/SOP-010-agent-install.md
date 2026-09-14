@@ -153,6 +153,7 @@ Windows 写入当前用户 Startup 的隐藏启动脚本；macOS 使用当前用
 1. 用户到 [阿里云 OSS](https://www.aliyun.com/product/oss) 开通自己的服务。Agent 引导创建私有 Bucket，选择实际地域，记录外网 HTTPS Endpoint 和地域 ID，说明存储和出站流量按账号实际计费。
 2. 为 Worker 创建专用 RAM 身份，只授予自己 Bucket 下 `lark-media-dl/*` 的上传、下载及分片相关权限；不要直接使用主账号全权 Key。按 [官方断点续传说明](https://www.alibabacloud.com/help/en/oss/developer-reference/resumable-upload-1) 核对 `PutObject`、`ListParts` 等操作，私有 ACL 上传需要对应权限。用真实上传错误核实策略，不给全资源管理员权限。
 3. 用户保管 `OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`；配置 `OSS_BUCKET`、`OSS_ENDPOINT`、`OSS_REGION`，以及 `MEDIA_DELIVERY=oss`。V4 签名必须带正确地域。
+   为当前设备自动下载配置 Bucket CORS：来源填写用户实际工作台的 origin（协议和域名，不含应用路径），允许 GET/HEAD；不要把 Bucket 改成公共读。Agent 用浏览器确认签名文件可读取，不能只用 Python 下载成功代替 CORS 验证。网页会读取文件 Blob 后交给浏览器保存，保持标签页打开；失败时使用原有手动下载入口。
 4. `python scripts/bootstrap.py --oss --apply` 安装可选依赖。配置 `OSS_URL_DAYS=1`（允许 1–7 天）。签名 URL 过期只让链接失效，**不会删除对象**；另为 `lark-media-dl/` 前缀配置用户认可的 Bucket 生命周期，例如 7 天删除。
 5. 先用小文件验证：无签名访问被拒绝，签名链接能下载，内容一致；再走一条网页任务，确认手机按钮出现。多个结果临时打 ZIP 上传，电脑 Downloads 中仍是平铺的原文件。
 6. 日常改回 `MEDIA_DELIVERY=local` 并重启 Worker，就恢复仅电脑保存；已有 OSS 对象仍遵循 Bucket 生命周期，不会被该开关删除。

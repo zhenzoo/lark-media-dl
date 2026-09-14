@@ -47,6 +47,10 @@ flowchart TD
 - `.env.example`：用户配置模板，没有真实值。
 - `.gitignore`：排除环境文件、Cookie、缓存、依赖目录、构建产物和本地验收记录。
 - `.gitattributes`：统一源码换行符，避免 Windows 检出后让 Linux 启动脚本带入 CRLF。
+- `src/media_dl/media_output.py`：寻找并校验 FFmpeg，只接受 yt-dlp 后处理完成记录，核验成片视频与应有音轨；分离流不作为成片交付。
+- `apps/miaoda/client/src/lib/auto-download.ts`：仅跟踪当前标签页提交的任务，完成后自动取回已提供链接的文件；保存等待状态、防止轮询重复和历史任务重下。
+- `apps/miaoda/tests/auto-download.test.cjs`：当前设备、并发轮询、刷新恢复、失败降级与仅本地模式的下载行为验证。
+- `tests/test_media_output.py`：缺失合并记录、无效 FFmpeg、真实音视频检查及忽略旧分离文件的回归验证。
 - `LICENSE`：自有代码 MIT 许可证。
 - `THIRD_PARTY_NOTICES.txt`：依赖、派生 UI、品牌标识的来源及许可说明。
 - `.github/workflows/ci.yml`：Windows/macOS/Linux 安装和离线测试；另做妙搭类型检查、合同测试和构建。
