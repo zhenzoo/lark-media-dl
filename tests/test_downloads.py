@@ -33,7 +33,8 @@ class DownloadTests(unittest.TestCase):
             first = download(URL, ENV)
             second = download(URL, ENV)
             a, b = Path(first['files'][0]), Path(second['files'][0])
-            self.assertEqual(a.parent, Path(tmp) / 'Downloads')
+            # macOS /var symlinks and Windows 8.3 names may spell the same directory differently.
+            self.assertTrue(a.parent.samefile(Path(tmp) / 'Downloads'))
             self.assertNotEqual(a, b)
             self.assertEqual(a.read_text(encoding='utf-8'), b.read_text(encoding='utf-8'))
             self.assertIn('正文', a.read_text(encoding='utf-8'))
