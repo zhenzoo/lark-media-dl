@@ -45,6 +45,7 @@ import {
 } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { createDownloadQueue, saveToDevice } from '@/lib/auto-download';
 
 const ACTIVE_STATUSES: MediaJobStatus[] = [
   'queued',
@@ -96,13 +97,13 @@ const WORKFLOW_OPTIONS: WorkflowOption[] = [
   {
     value: 'video',
     label: '下载内容',
-    detail: '视频 / 图文 / 文字',
+    detail: '视频含原音轨 / 图文 / 文字',
     icon: ArrowDownToLine,
   },
   {
     value: 'audio',
     label: '提取音频',
-    detail: '输出 MP3',
+    detail: '只输出 MP3 音频',
     icon: Music2,
   },
   {
@@ -283,6 +284,10 @@ const JobRow: React.FC<JobRowProps> = ({ job, retryingId, onRetry }) => {
 };
 
 const JobsPage: React.FC = () => {
+  const deviceDownloads = useMemo(() => createDownloadQueue(
+    window.sessionStorage, `media-dl-pending:${window.location.pathname}`,
+    saveToDevice, (message, failed) => failed ? toast.error(message) : toast.success(message),
+  ), []);
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const [workflow, setWorkflow] = useState<MediaWorkflow>('video');
   const [quality, setQuality] = useState<MediaQuality>('1080');
@@ -302,6 +307,8 @@ const JobsPage: React.FC = () => {
   const hasActiveJobs: boolean = jobs.some((job: MediaJob) =>
     ACTIVE_STATUSES.includes(job.status),
   );
+
+  useEffect(() => { void deviceDownloads.inspect(jobs); }, [deviceDownloads, jobs]);
 
   const refreshJobs = useCallback(
     async (showLoading: boolean = false): Promise<void> => {
@@ -344,7 +351,8 @@ const JobsPage: React.FC = () => {
     setSubmitting(true);
     setError(null);
     try {
-      await createMediaJob({ sourceUrl: normalizedUrl, workflow, quality });
+      const created = await createMediaJob({ sourceUrl: normalizedUrl, workflow, quality });
+      if (workflow !== 'inspect') deviceDownloads.remember(created.job.id);
       setSourceUrl('');
       toast.success(
         workflow === 'inspect' ? '解析任务已加入队列' : '下载任务已加入队列',
@@ -360,7 +368,8 @@ const JobsPage: React.FC = () => {
   const handleRetry = async (id: string): Promise<void> => {
     setRetryingId(id);
     try {
-      await retryMediaJob(id);
+      const retried = await retryMediaJob(id);
+      if (retried.job.workflow !== 'inspect') deviceDownloads.remember(retried.job.id);
       toast.success('任务已重新排队');
       await refreshJobs(false);
     } catch (requestError: unknown) {
