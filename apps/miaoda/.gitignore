@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+.spark/
+node_modules/
+dist/
+logs/
+*.tsbuildinfo

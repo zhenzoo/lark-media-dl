@@ -1,0 +1,11 @@
+{
+  "openapi": "3.0.3",
+  "info": {"title": "lark-media-dl Worker API", "version": "0.1.0"},
+  "components": {"securitySchemes": {"workerKey": {"type": "http", "scheme": "bearer"}}},
+  "security": [{"workerKey": []}],
+  "paths": {
+    "/openapi/jobs/next": {"get": {"summary": "Atomically claim the oldest queued task", "parameters": [{"name": "workerId", "in": "query", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "job or null; pollAfterSeconds"}}}},
+    "/openapi/jobs/worker/heartbeat": {"post": {"summary": "Report workerId and version", "responses": {"201": {"description": "accepted and worker status"}}}},
+    "/openapi/jobs/update": {"post": {"summary": "Update claimed task; completed downloads need outputName, deliveryUrl is optional", "responses": {"201": {"description": "accepted and job"}}}}
+  }
+}
