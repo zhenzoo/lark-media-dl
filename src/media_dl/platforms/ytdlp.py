@@ -5,6 +5,7 @@ import subprocess
 import sys
 import shutil
 from ..config import ffmpeg_path
+from ..media_output import FINAL_TEMPLATE, final_media, require_ffmpeg
 from .bilibili import bili_anon_cookiejar
 from .x import twitter_via_fxtwitter
 
@@ -12,7 +13,7 @@ from .x import twitter_via_fxtwitter
 def download(url: str, platform: str, outdir: Path, env: dict, *, audio=False,
              meta_only=False, quality='1080', cookies=None, browser=None) -> dict:
     proxy = env.get('MEDIA_DL_PROXY', env.get('HTTPS_PROXY', ''))
-    flags = ['--no-playlist', '--no-progress', '--no-warnings', '--socket-timeout', '30',
+    flags = ['--ignore-config', '--no-playlist', '--no-progress', '--no-warnings', '--socket-timeout', '30',
              '--retries', '3', '--fragment-retries', '3', '--proxy', proxy,
              '--user-agent', 'Mozilla/5.0']
     if cookies:
@@ -24,7 +25,7 @@ def download(url: str, platform: str, outdir: Path, env: dict, *, audio=False,
     if platform == 'bilibili':
         flags += ['--add-header', 'Origin:https://www.bilibili.com',
                   '--add-header', 'Referer:https://www.bilibili.com/']
-    ffmpeg = ffmpeg_path(env)
+    ffmpeg = ffmpeg_path(env) if meta_only else require_ffmpeg(env)
     if ffmpeg:
         flags += ['--ffmpeg-location', ffmpeg]
     runtime = env.get('MEDIA_DL_JS_RUNTIME') or next((name for name in ('deno', 'node', 'bun', 'qjs') if shutil.which(name)), None)
@@ -45,7 +46,9 @@ def download(url: str, platform: str, outdir: Path, env: dict, *, audio=False,
         flags += ['--skip-download', '--dump-single-json']
     else:
         outdir.mkdir(parents=True, exist_ok=True)
+        manifest = outdir / '.final-media.jsonl'
         flags += ['--no-overwrites', '--restrict-filenames', '-N', '8',
+                  '--no-simulate', '--print-to-file', FINAL_TEMPLATE, str(manifest),
                   '-o', str(outdir / '%(title).80s-%(id)s.%(ext)s')]
         if audio:
             if not ffmpeg:
@@ -53,7 +56,7 @@ def download(url: str, platform: str, outdir: Path, env: dict, *, audio=False,
             flags += ['-x', '--audio-format', 'mp3', '-f', 'bestaudio/best']
         else:
             fmt = 'bv*+ba/b' if quality == 'best' else f'bv*[height<={quality}]+ba/b[height<={quality}]'
-            flags += ['-f', fmt, '--merge-output-format', 'mp4']
+            flags += ['-f', fmt, '--merge-output-format', 'mp4', '--remux-video', 'mp4']
     result = subprocess.run([sys.executable, '-m', 'yt_dlp', *flags, url],
                             capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=7200)
     if result.returncode:
@@ -62,8 +65,5 @@ def download(url: str, platform: str, outdir: Path, env: dict, *, audio=False,
         info = json.loads(result.stdout)
         return {'meta': {'title': info.get('title'), 'uploader': info.get('uploader'),
                          'duration_sec': info.get('duration')}, 'files': []}
-    files = [p for p in outdir.iterdir() if p.is_file() and p.suffix.lower() in
-             {'.mp4', '.mkv', '.webm', '.mp3', '.m4a', '.ogg', '.wav', '.mov'}]
-    if not files or (audio and any(p.suffix != '.mp3' for p in files)):
-        raise RuntimeError('下载没有生成所请求的媒体文件')
+    files = final_media(manifest, outdir, ffmpeg, audio)
     return {'meta': metadata, 'files': files}

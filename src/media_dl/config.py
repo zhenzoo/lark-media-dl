@@ -1,7 +1,7 @@
 """Portable local configuration. Secrets are never included in status output."""
 from pathlib import Path
 import os
-import shutil
+from .media_output import find_ffmpeg
 
 
 def config_dir() -> Path:
@@ -36,17 +36,7 @@ def load_config(path: str | None = None) -> dict[str, str]:
 
 
 def ffmpeg_path(env: dict) -> str | None:
-    explicit = env.get('FFMPEG_BINARY')
-    if explicit:
-        return explicit
-    system = shutil.which('ffmpeg')
-    if system:
-        return system
-    try:
-        import imageio_ffmpeg
-        return imageio_ffmpeg.get_ffmpeg_exe()
-    except ImportError:
-        return None
+    return find_ffmpeg(env)
 
 
 def redact(message: str, env: dict) -> str:
