@@ -371,6 +371,7 @@ class JobsService {
       host === domain || host.endsWith(`.${domain}`);
     if (matches('youtube.com') || matches('youtu.be')) return 'youtube';
     if (matches('threads.com') || matches('threads.net')) return 'threads';
+    if (matches('linkedin.com') || matches('lnkd.in')) return 'linkedin';
     if (matches('bilibili.com') || matches('b23.tv')) return 'bilibili';
     if (
       matches('xiaohongshu.com') ||
@@ -387,7 +388,7 @@ class JobsService {
       return 'x';
     }
     throw new BadRequestException(
-      '当前支持 YouTube、Bilibili、小红书、X 和 Threads',
+      '当前支持 YouTube、Bilibili、小红书、X、Threads 和 LinkedIn',
     );
   }
 

@@ -18,7 +18,7 @@ def inspect(env, platform=None, network=False):
             version = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
             version = None
-        add(name, version, version or 'missing', name == 'requests' or platform in (None, 'youtube', 'bilibili', 'x'))
+        add(name, version, version or 'missing', name == 'requests' or platform in (None, 'youtube', 'bilibili', 'x', 'linkedin'))
     ffmpeg = ffmpeg_path(env)
     add('ffmpeg', ffmpeg, 'available' if ffmpeg else 'missing; install FFmpeg or imageio-ffmpeg')
     js = env.get('MEDIA_DL_JS_RUNTIME') or next((x for x in ('deno', 'node', 'bun', 'qjs') if shutil.which(x)), None)
@@ -32,7 +32,8 @@ def inspect(env, platform=None, network=False):
         import requests
         urls = {'youtube': 'https://www.youtube.com', 'bilibili': 'https://www.bilibili.com',
                 'x': 'https://api.fxtwitter.com', 'xiaohongshu': 'https://www.xiaohongshu.com',
-                'threads': env.get('TIKHUB_BASE', 'https://api.tikhub.dev')}
+                'threads': env.get('TIKHUB_BASE', 'https://api.tikhub.dev'),
+                'linkedin': 'https://www.linkedin.com'}
         for name, url in urls.items():
             if platform and name != platform:
                 continue
@@ -53,7 +54,7 @@ def inspect(env, platform=None, network=False):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--platform', choices=['youtube', 'bilibili', 'x', 'xiaohongshu', 'threads'])
+    parser.add_argument('--platform', choices=['youtube', 'bilibili', 'x', 'xiaohongshu', 'threads', 'linkedin'])
     parser.add_argument('--env-file')
     parser.add_argument('--network', action='store_true')
     parser.add_argument('--json', action='store_true')

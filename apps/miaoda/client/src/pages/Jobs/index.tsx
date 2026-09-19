@@ -77,6 +77,7 @@ const PLATFORM_COPY: Record<MediaJob['platform'], string> = {
   xiaohongshu: '小红书',
   x: 'X',
   threads: 'Threads',
+  linkedin: 'LinkedIn',
 };
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('zh-CN', {
@@ -123,6 +124,9 @@ const detectPlatform = (value: string): string => {
     normalized.includes('threads.net')
   ) {
     return 'Threads';
+  }
+  if (normalized.includes('linkedin.com') || normalized.includes('lnkd.in')) {
+    return 'LinkedIn';
   }
   if (normalized.includes('youtube.com') || normalized.includes('youtu.be')) {
     return 'YouTube';
@@ -185,7 +189,7 @@ const JobRow: React.FC<JobRowProps> = ({ job, retryingId, onRetry }) => {
   const metadata: string[] = [
     PLATFORM_COPY[job.platform],
     WORKFLOW_COPY[job.workflow],
-    job.workflow === 'video' && job.platform !== 'threads'
+    job.workflow === 'video' && job.platform !== 'threads' && job.platform !== 'linkedin'
       ? `${job.quality}p`.replace('bestp', '最高画质')
       : '',
     duration ?? '',
@@ -430,8 +434,8 @@ const JobsPage: React.FC = () => {
               粘贴链接，文件在本机完成下载。
             </h2>
             <p className="mt-3 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground">
-              支持 YouTube、Bilibili、小红书、X 和 Threads。 Threads
-              可保存文字、图片、视频和动图，文件直接进入电脑的 Downloads。
+              支持 YouTube、Bilibili、小红书、X、Threads 和 LinkedIn。Threads
+              可保存文字、图片、视频和动图；X 推文的多个视频和图片全部保存；LinkedIn 帖子可保存正文、图片和视频，文件直接进入电脑的 Downloads。
             </p>
           </div>
 

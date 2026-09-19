@@ -10,6 +10,7 @@ DOMAINS = {
     'xiaohongshu': ('xiaohongshu.com', 'xhslink.com'),
     'x': ('x.com', 'twitter.com', 'fxtwitter.com', 'vxtwitter.com'),
     'threads': ('threads.com', 'threads.net'),
+    'linkedin': ('linkedin.com', 'lnkd.in'),
 }
 
 
@@ -21,7 +22,7 @@ def detect_platform(url: str) -> str:
     for platform, domains in DOMAINS.items():
         if any(host == d or host.endswith('.' + d) for d in domains):
             return platform
-    raise ValueError('当前支持 YouTube、Bilibili、小红书、X 和 Threads')
+    raise ValueError('当前支持 YouTube、Bilibili、小红书、X、Threads 和 LinkedIn')
 
 
 def download(url: str, env: dict, *, outdir=None, audio=False, meta_only=False,
@@ -40,6 +41,14 @@ def download(url: str, env: dict, *, outdir=None, audio=False, meta_only=False,
             post = client.fetch_post(url)
             result = {'meta': metadata(post), 'files': [] if meta_only else
                       client.download(post, url, scratch, quality, audio_only=audio)}
+        elif platform == 'x':
+            from .platforms.x import download as x_download
+            result = x_download(url, scratch, env, audio=audio, meta_only=meta_only,
+                                quality=quality, cookies=cookies, browser=browser)
+        elif platform == 'linkedin':
+            from .platforms.linkedin import download as linkedin_download
+            result = linkedin_download(url, scratch, env, audio=audio, meta_only=meta_only,
+                                       quality=quality, cookies=cookies, browser=browser)
         elif platform == 'xiaohongshu':
             if browser:
                 raise ValueError('小红书当前请用 --cookies 指定 Netscape Cookie 文件')

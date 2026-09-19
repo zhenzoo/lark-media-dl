@@ -3,7 +3,8 @@ export type MediaPlatform =
   | 'bilibili'
   | 'xiaohongshu'
   | 'x'
-  | 'threads';
+  | 'threads'
+  | 'linkedin';
 
 export type MediaWorkflow = 'video' | 'audio' | 'inspect';
 

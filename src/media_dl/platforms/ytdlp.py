@@ -1,4 +1,4 @@
-"""Shared yt-dlp execution for YouTube, Bilibili and resolved X video."""
+"""Shared yt-dlp execution for YouTube, Bilibili, LinkedIn and each resolved X video URL."""
 from pathlib import Path
 import json
 import subprocess
@@ -7,11 +7,12 @@ import shutil
 from ..config import ffmpeg_path
 from ..media_output import FINAL_TEMPLATE, final_media, require_ffmpeg
 from .bilibili import bili_anon_cookiejar
-from .x import twitter_via_fxtwitter
 
 
 def download(url: str, platform: str, outdir: Path, env: dict, *, audio=False,
-             meta_only=False, quality='1080', cookies=None, browser=None) -> dict:
+             meta_only=False, quality='1080', cookies=None, browser=None, name=None) -> dict:
+    """``name`` fixes the output stem (needed when one post yields several files); the
+    finished-file manifest is per call so multiple runs into one directory stay separate."""
     proxy = env.get('MEDIA_DL_PROXY', env.get('HTTPS_PROXY', ''))
     flags = ['--ignore-config', '--no-playlist', '--no-progress', '--no-warnings', '--socket-timeout', '30',
              '--retries', '3', '--fragment-retries', '3', '--proxy', proxy,
@@ -32,24 +33,15 @@ def download(url: str, platform: str, outdir: Path, env: dict, *, audio=False,
     if runtime:
         flags += ['--js-runtimes', runtime]
     metadata = {}
-    if platform == 'x':
-        post = twitter_via_fxtwitter(url, proxy)
-        if not post:
-            raise RuntimeError('X 未解析出公开视频；当前不支持纯文字或图片帖')
-        metadata = {'title': post['title'], 'uploader': post['author'], 'duration_sec': post['duration']}
-        if meta_only:
-            return {'meta': metadata, 'files': []}
-        url = post['m3u8'] or post['direct_url']
-        if not url:
-            raise RuntimeError('X 视频没有可下载地址')
     if meta_only:
         flags += ['--skip-download', '--dump-single-json']
     else:
         outdir.mkdir(parents=True, exist_ok=True)
-        manifest = outdir / '.final-media.jsonl'
+        manifest = outdir / (f'.final-media-{name}.jsonl' if name else '.final-media.jsonl')
+        template = f'{name}.%(ext)s' if name else '%(title).80s-%(id)s.%(ext)s'
         flags += ['--no-overwrites', '--restrict-filenames', '-N', '8',
                   '--no-simulate', '--print-to-file', FINAL_TEMPLATE, str(manifest),
-                  '-o', str(outdir / '%(title).80s-%(id)s.%(ext)s')]
+                  '-o', str(outdir / template)]
         if audio:
             if not ffmpeg:
                 raise RuntimeError('提取 MP3 需要 FFmpeg')

@@ -78,11 +78,12 @@ flowchart TD
 - `delivery.py`：本地模式返回文件名；OSS 模式上传私有文件/ZIP 并生成临时链接。
 - `worker.py`：轮询队列、校验任务、调用核心、刷新任务租约与电脑心跳、回传完成或失败；同一应用和电脑标识只能运行一个实例。
 - `platforms/__init__.py`：平台适配包入口。
-- `platforms/ytdlp.py`：YouTube、B 站和 X 视频共用的 yt-dlp 调用、Cookie、画质和音轨转换。
+- `platforms/ytdlp.py`：YouTube、B 站、LinkedIn 以及 X 每条已解析视频地址共用的 yt-dlp 调用、Cookie、画质和音轨转换；`name` 参数固定输出文件名并隔离完成清单，供一帖多文件使用。
 - `platforms/bilibili.py`：B 站公开下载所需匿名票据及本地缓存；不替代账号权限。
-- `platforms/x.py`：通过 FxTwitter 查询 X 公开视频地址和元数据。
+- `platforms/x.py`：通过 FxTwitter 解析整条推文，按发帖顺序保存全部视频、图片、动图与正文；音频模式对每个视频各提取 MP3。
 - `platforms/xiaohongshu.py`：分享链接解析、TikHub/公开页面详情、图文/视频保存和音频提取。
 - `platforms/threads.py`：TikHub 精确定位目标帖，处理纯文字、图集、视频和动图；API 与媒体连接分离，验证每个媒体地址。
+- `platforms/linkedin.py`：免登录抓取公开帖页面，只解析主帖块（排除相关帖与评论）得到正文、作者、图片；视频交 `ytdlp.py`，音频从成片 MP4 提取并核验音轨。
 
 新增平台应增加适配器，再同步 URL 识别、CLI、网页类型、测试与 README。不能只在平台列表里加个名字。
 
@@ -154,7 +155,7 @@ flowchart TD
 
 - `tests/test_downloads.py`：平台和目标帖校验、文字/图集、文件碰撞、失败不交付、配置优先级、Worker 状态及重定向。
 - `tests/test_installation.py`：重复注册、已有 Skill/用户编辑保护、卸载保留额外文件、三系统启动配置路径。
-- `assets/logos/youtube.svg`、`bilibili.svg`、`xiaohongshu.svg`、`x.svg`、`threads.svg`：README 品牌标识，来源 Simple Icons。
+- `assets/logos/youtube.svg`、`bilibili.svg`、`xiaohongshu.svg`、`x.svg`、`threads.svg`：README 品牌标识，来源 Simple Icons；`linkedin.svg` 来源 Font Awesome Free（见 THIRD_PARTY_NOTICES）。
 - `assets/screenshots/workbench.png`：独立部署后真实本地完成状态的截图。
 - `docs/SOP-010-agent-install.md`：Agent 的环境调查、安装、Key/登录/网络、自启动、卸载与可选手机交付。
 - `docs/LOG-010-release-validation.md`：实际执行的验收及未覆盖边界。

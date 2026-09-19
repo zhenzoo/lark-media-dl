@@ -38,6 +38,9 @@ https://cdn.simpleicons.org/{brand} on 2026-09-14.
 Simple Icons: CC0-1.0, https://github.com/simple-icons/simple-icons
 License: https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md
 Brand trademarks and brand-specific usage guidelines are separate from CC0.
+assets/logos/linkedin.svg is the Font Awesome Free 6 "linkedin" brand icon, retrieved via
+https://api.iconify.design/fa6-brands/linkedin.svg on 2026-09-19 (Simple Icons no longer ships it).
+Font Awesome Free icons: CC BY 4.0, https://fontawesome.com/license/free
 Names/logos describe compatibility; they do not imply endorsement.
 
 Services and media

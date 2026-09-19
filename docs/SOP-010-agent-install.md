@@ -25,7 +25,7 @@ last_reviewed: 2026-09-14
 2. 找到用户实际使用的 Agent 配置目录及已有 `media-dl` Skill。Codex 默认共享目录是 `~/.agents/skills`，Claude Code 默认是 `~/.claude/skills`；非默认 profile 必须查宿主配置。Kimi 的目录按已安装版本核对，不猜。
 3. 检查 Python 3.10+、Git。缺失时从 [Python](https://www.python.org/downloads/) 和 [Git](https://git-scm.com/downloads) 获取适合系统的安装方式；仅安装用户需要的组件，不改别的项目环境。Linux 若缺 venv，按发行版安装对应 python-venv 包。
 4. 阅读 `pyproject.toml` 后运行下面的预览，再安装。安装只写仓库的 `.venv`，不依赖作者的私人目录。
-5. 不要求用户先注册所有服务。Threads 才必须走 TikHub；公开 YouTube、B 站和 X 视频先尝试无需账号的路径。
+5. 不要求用户先注册所有服务。Threads 才必须走 TikHub；公开 YouTube、B 站、X 视频和 LinkedIn 帖子先尝试无需账号的路径（LinkedIn 页面通常需要媒体代理）。
 
 在仓库根目录：
 

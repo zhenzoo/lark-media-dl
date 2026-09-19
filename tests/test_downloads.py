@@ -10,6 +10,7 @@ from media_dl import cli
 from media_dl.config import load_config
 from media_dl.downloader import download, detect_platform
 from media_dl.platforms.threads import ThreadsClient, find_post, media_assets
+from media_dl.platforms import linkedin, x
 from media_dl.delivery import deliver
 from media_dl.worker import Worker
 
@@ -21,7 +22,9 @@ ENV = {'TIKHUB_API_KEY': 'test-key'}
 class DownloadTests(unittest.TestCase):
     def test_host_validation_and_platforms(self):
         for url, name in [('https://youtu.be/id', 'youtube'), ('https://b23.tv/id', 'bilibili'),
-                          ('https://xhslink.com/id', 'xiaohongshu'), ('https://x.com/u/status/1', 'x'), (URL, 'threads')]:
+                          ('https://xhslink.com/id', 'xiaohongshu'), ('https://x.com/u/status/1', 'x'), (URL, 'threads'),
+                          ('https://www.linkedin.com/posts/u_slug-activity-7505337342660939776-Az3R', 'linkedin'),
+                          ('https://lnkd.in/abc', 'linkedin')]:
             self.assertEqual(detect_platform(url), name)
         for url in ['https://youtube.com.evil.test/a', 'http://youtube.com/a', 'https://user@x.com/a', 'https://localhost/a']:
             with self.assertRaises(ValueError):
@@ -89,6 +92,83 @@ class DownloadTests(unittest.TestCase):
             for url in ('https://youtu.be/id', 'https://b23.tv/id'):
                 result = download(url, {}, outdir=tmp)
                 self.assertTrue(Path(result['files'][0]).is_file())
+
+    def test_linkedin_page_parser_keeps_only_the_main_post(self):
+        page = (
+            '<meta property="og:image" content="https://media.licdn.com/dms/image/v2/MAIN/feedshare-shrink_800/a?e=1&amp;t=og">'
+            '<article class="main-feed-activity-card main-feed-activity">'
+            '<a data-tracking-control-name="public_post_feed-actor-name"> Owner </a>'
+            '<p class="attributed-text-segment-list__content" data-test-id="main-feed-activity-card__commentary">Body &amp; more<br/>two</p>'
+            '<p class="attributed-text-segment-list__content comment__text">a comment</p>'
+            '<ul data-test-id="feed-images-content"><li><img data-delayed-url="https://media.licdn.com/dms/image/v2/MAIN/feedshare-shrink_800/a?e=1&amp;t=x"></li>'
+            '<li><img data-delayed-url="https://static.licdn.com/icon"></li></ul></article>'
+            '<article class="main-feed-activity-card related-posts__cro"><video></video>'
+            '<ul data-test-id="feed-images-content"><li><img data-delayed-url="https://media.licdn.com/dms/image/v2/OTHER/feedshare-shrink_800/b"></li></ul></article>')
+        post = linkedin.parse_page(page)
+        self.assertEqual(post['author'], 'Owner')
+        self.assertEqual(post['text'], 'Body & more\ntwo')
+        self.assertEqual(post['images'], ['https://media.licdn.com/dms/image/v2/MAIN/feedshare-shrink_800/a?e=1&t=x'])
+        self.assertFalse(post['has_video'])
+        self.assertIsNone(linkedin.parse_page('<article class="related-posts__cro"></article>'))
+
+    def test_linkedin_text_and_images_without_any_key(self):
+        post = {'text': 'Hello', 'author': 'Owner', 'images': ['https://media.licdn.com/dms/image/v2/MAIN/feedshare-shrink_800/a'], 'has_video': False}
+        def fake_image(url, proxy, target):
+            path = target.with_suffix('.jpg'); path.write_bytes(b'jpg'); return path
+        with tempfile.TemporaryDirectory() as tmp, patch.object(linkedin, 'fetch_page', return_value=post), \
+             patch.object(linkedin, 'fetch_image', side_effect=fake_image):
+            result = download('https://www.linkedin.com/posts/u_slug-activity-7505337342660939776-Az3R', {}, outdir=tmp)
+            names = sorted(Path(f).name for f in result['files'])
+            self.assertEqual(names, ['linkedin-7505337342660939776-01.jpg', 'linkedin-7505337342660939776.txt'])
+            self.assertIn('Hello', (Path(tmp) / 'linkedin-7505337342660939776.txt').read_text(encoding='utf-8'))
+            self.assertEqual(result['meta']['uploader'], 'Owner')
+            meta = download('https://www.linkedin.com/posts/u_slug-activity-7505337342660939776-Az3R', {}, outdir=tmp, meta_only=True)
+            self.assertEqual(meta['meta']['title'], 'Hello')
+            with self.assertRaises(RuntimeError):   # no video -> no audio, and nothing is published
+                download('https://www.linkedin.com/posts/u_slug-activity-7505337342660939776-Az3R', {}, outdir=tmp, audio=True)
+
+    def test_linkedin_video_uses_shared_ytdlp_contract(self):
+        post = {'text': '', 'author': 'Owner', 'images': [], 'has_video': True}
+        def fake_yt(url, platform, outdir, env, **kwargs):
+            self.assertEqual((platform, kwargs['quality'], kwargs['audio']), ('linkedin', 'best', False))
+            p = outdir / 'clip-1.mp4'; p.write_bytes(b'finished-media'); return {'files': [p]}
+        with tempfile.TemporaryDirectory() as tmp, patch.object(linkedin, 'fetch_page', return_value=post), \
+             patch('media_dl.platforms.ytdlp.download', side_effect=fake_yt):
+            result = download('https://www.linkedin.com/posts/u_slug-ugcPost-7503022951252828161-eXh5?utm=1', {}, outdir=tmp)
+            self.assertEqual([Path(f).name for f in result['files']], ['clip-1.mp4'])
+
+    def test_x_saves_every_video_photo_and_text_in_order(self):
+        tweet = {'id': '2100912907038896466', 'author': 'LN_Data', 'text': 'two clips', 'title': 'two clips',
+                 'media': [{'type': 'video', 'm3u8': 'https://v/1.m3u8', 'direct_url': 'https://v/1.mp4', 'duration': 7.2},
+                           {'type': 'photo', 'url': 'https://pbs.twimg.com/media/a.jpg?name=orig'},
+                           {'type': 'video', 'm3u8': None, 'direct_url': 'https://v/2.mp4', 'duration': 9.2}]}
+        calls = []
+        def fake_yt(url, platform, outdir, env, **kwargs):
+            calls.append((url, kwargs['name']))
+            p = outdir / (kwargs['name'] + '.mp4'); p.write_bytes(b'finished-media'); return {'files': [p]}
+        def fake_photo(url, stem, proxy):
+            p = stem.with_suffix('.jpg'); p.write_bytes(b'jpg'); return p
+        with tempfile.TemporaryDirectory() as tmp, patch.object(x, 'twitter_via_fxtwitter', return_value=tweet), \
+             patch('media_dl.platforms.ytdlp.download', side_effect=fake_yt), patch.object(x, 'fetch_photo', side_effect=fake_photo):
+            result = download('https://x.com/LN_Data/status/2100912907038896466?s=20', {}, outdir=tmp)
+            self.assertEqual(sorted(Path(f).name for f in result['files']),
+                             ['x-2100912907038896466-01.jpg', 'x-2100912907038896466-01.mp4',
+                              'x-2100912907038896466-02.mp4', 'x-2100912907038896466.txt'])
+            self.assertEqual(calls, [('https://v/1.m3u8', 'x-2100912907038896466-01'), ('https://v/2.mp4', 'x-2100912907038896466-02')])
+            self.assertEqual((result['meta']['video_count'], result['meta']['photo_count']), (2, 1))
+            meta = download('https://x.com/LN_Data/status/2100912907038896466', {}, outdir=tmp, meta_only=True)
+            self.assertEqual(meta['meta']['uploader'], 'LN_Data')
+
+    def test_x_media_items_keep_order_and_prefer_m3u8(self):
+        tw = {'media': {'all': [{'type': 'photo', 'url': 'https://pbs.twimg.com/media/a.jpg'},
+                                {'type': 'video', 'url': 'https://v/best.mp4', 'formats': [{'container': 'mp4', 'url': 'https://v/low.mp4'}, {'container': 'm3u8', 'url': 'https://v/pl.m3u8'}]}]}}
+        items = x.media_items(tw)
+        self.assertEqual([i['type'] for i in items], ['photo', 'video'])
+        self.assertEqual(items[0]['url'], 'https://pbs.twimg.com/media/a.jpg?name=orig')
+        self.assertEqual((items[1]['m3u8'], items[1]['direct_url']), ('https://v/pl.m3u8', 'https://v/best.mp4'))
+        with tempfile.TemporaryDirectory() as tmp, patch.object(x, 'twitter_via_fxtwitter', return_value={'id': '1', 'author': 'a', 'text': 't', 'title': 't', 'media': []}):
+            with self.assertRaises(RuntimeError):   # no video -> audio mode fails closed
+                download('https://x.com/a/status/1', {}, outdir=tmp, audio=True)
 
     def test_local_delivery_has_no_cloud_dependency(self):
         self.assertEqual(deliver(['/any/result.txt'], 'job', {}), {'outputName': 'result.txt'})

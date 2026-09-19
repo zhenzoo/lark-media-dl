@@ -10,7 +10,7 @@ does_not_own:
   - detailed installation procedures or implementation contracts
 read_when:
   - first opening this repository
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-19
 ---
 
 # lark-media-dl · 万能媒体工作台
@@ -26,7 +26,8 @@ last_reviewed: 2026-09-14
 <a href="https://www.bilibili.com/"><img src="assets/logos/bilibili.svg" width="28" height="28" alt="Bilibili"></a> <a href="https://www.bilibili.com/">Bilibili</a> &nbsp;
 <a href="https://www.xiaohongshu.com/"><img src="assets/logos/xiaohongshu.svg" width="28" height="28" alt="小红书"></a> <a href="https://www.xiaohongshu.com/">小红书</a> &nbsp;
 <a href="https://x.com/"><img src="assets/logos/x.svg" width="28" height="28" alt="X"></a> <a href="https://x.com/">X</a> &nbsp;
-<a href="https://www.threads.com/"><img src="assets/logos/threads.svg" width="28" height="28" alt="Threads"></a> <a href="https://www.threads.com/">Threads</a>
+<a href="https://www.threads.com/"><img src="assets/logos/threads.svg" width="28" height="28" alt="Threads"></a> <a href="https://www.threads.com/">Threads</a> &nbsp;
+<a href="https://www.linkedin.com/"><img src="assets/logos/linkedin.svg" width="28" height="28" alt="LinkedIn"></a> <a href="https://www.linkedin.com/">LinkedIn</a>
 </p>
 
 ## 从个人下载开始
@@ -67,14 +68,15 @@ macOS/Linux 将解释器路径替换为 `.venv/bin/python`。支持 `--audio` �
 | YouTube | 单条公开视频、音轨 MP3、元数据 | 通常无 API Key；部分内容需本人有效登录；需要可用网络和 yt-dlp 支持的 JavaScript 运行环境 |
 | Bilibili | 单条视频、音轨 MP3、元数据 | 通常无 API Key；清晰度及受限内容取决于账号已有权限 |
 | 小红书 | 图文正文与图片、视频、可提取音轨、元数据 | TikHub 解析或公开页面路径；部分链接需完整分享参数或本人 Cookie |
-| X | 公开视频、可提取音轨、视频元数据 | 当前通过 FxTwitter，无 X API Key；不包含纯文字、图片帖或多视频完整归档保证 |
+| X | 单条公开推文的**全部媒体**：多视频、图片、动图与混合内容按发帖顺序保存；正文 TXT；有音轨的视频可提取 MP3 | 通过 FxTwitter 解析，无 X API Key；媒体 CDN 走媒体代理；不包含引用推文或整个线程 |
 | Threads | 正文 TXT、图片、图文、视频、动图；有音轨的视频可提取 MP3 | **需要有余额且开通接口权限的 TIKHUB_API_KEY**；无需 Threads Cookie 或 Meta 发帖 Token |
+| LinkedIn | 单条公开帖的正文 TXT、作者、图片、视频（最高约 720p）；有音轨的视频可提取 MP3 | 无 Key、无需登录；页面走媒体代理（大陆通常需要），不包含 PDF 文档帖、评论区或需登录内容 |
 
 TikHub 是部分平台的解析服务，**不是整个项目唯一依赖**。Python、requests、yt-dlp 和 FFmpeg 负责实际下载与媒体处理。安装脚本处理 Python 依赖，Agent 再根据操作系统、网络与目标平台补齐必要项。
 
 注册 [TikHub](https://tikhub.io/) 后把自己的 Key 存入用户配置；查 [官方文档](https://docs.tikhub.io/) 确认余额和权限。只有需要该服务的平台才配置，不要求所有人先充值。
 
-“万能”是工作台名称，能力以上表为准。TikTok、抖音等尚未接入本仓；不承诺任意链接、会员/私密内容、整账号归档或所有平台的最高画质。平台接口变化可能使具体链接暂时失效，不能用封面图片冒充下载成功。
+“万能”是工作台名称，能力以上表为准。LinkedIn 只解析主帖，不下载页面里的相关帖和评论；不少 LinkedIn 短片本身无声，音频模式会明确报告无音轨。TikTok、抖音等尚未接入本仓；不承诺任意链接、会员/私密内容、整账号归档或所有平台的最高画质。平台接口变化可能使具体链接暂时失效，不能用封面图片冒充下载成功。
 
 ## 想直接贴链接，就加一个网页
 

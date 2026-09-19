@@ -1,6 +1,6 @@
 ---
 name: media-dl
-description: Download or save public media from YouTube, Bilibili, Xiaohongshu, X and Threads to the user's computer. Threads supports text, images, video and animation. Use when asked to save a link, download media, inspect metadata or extract audio.
+description: Download or save public media from YouTube, Bilibili, Xiaohongshu, X, Threads and LinkedIn to the user's computer. Threads supports text, images, video and animation; LinkedIn posts keep text, images and video without login. Use when asked to save a link, download media, inspect metadata or extract audio.
 ---
 
 # media-dl
@@ -24,7 +24,10 @@ run `scripts/install_skill.py` first. Never guess a maintainer's private path.
    extraction when a video was returned, or all images when some failed.
 4. On failure inspect the actual error. Threads needs the user's TikHub Key with
    balance and endpoint permission, not Threads cookies or a Meta publishing token.
-   X supports public video posts. Other platforms may need login for restricted
+   X saves every video, photo and gif of one public post plus its text (not
+   quoted posts or whole threads). LinkedIn needs no key but the post page usually
+   needs the media proxy; PDF document posts and comments are not saved, and silent
+   clips fail audio extraction on purpose. Other platforms may need login for restricted
    content or higher quality. Preserve Xiaohongshu share parameters.
 5. Inspect network access before selecting a proxy. Never assume another machine's
    proxy port. Do not print API keys, cookies, passwords or signed download URLs
