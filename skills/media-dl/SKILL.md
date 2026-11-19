@@ -1,6 +1,6 @@
 ---
 name: media-dl
-description: Download or save public media from YouTube, Bilibili, Xiaohongshu, X, Threads and LinkedIn to the user's computer. Threads supports text, images, video and animation; LinkedIn posts keep text, images and video without login. Use when asked to save a link, download media, inspect metadata or extract audio.
+description: Download or save public media from YouTube, Bilibili, Xiaohongshu, X, Threads, LinkedIn and WeChat Channels (微信视频号) to the user's computer. Threads supports text, images, video and animation; LinkedIn posts keep text, images and video without login. Use when asked to save a link, download media, inspect metadata or extract audio.
 ---
 
 # media-dl
@@ -32,6 +32,8 @@ run `scripts/install_skill.py` first. Never guess a maintainer's private path.
 5. Inspect network access before selecting a proxy. Never assume another machine's
    proxy port. Do not print API keys, cookies, passwords or signed download URLs
    into public reports. Login, registration and payment stay with the user's account.
+
+For a WeChat Channels video, pass its HTTPS `weixin.qq.com/sph/…` share link to the same wrapper. The default saves the available MP4. Use `--audio` for MP3 or `--meta-only` for title, uploader and duration. Set `TIKHUB_API_KEY` with Channels video-detail permission and a balance. No WeChat or Yuanbao cookie is needed.
 
 Downloads and metadata requests do not need Feishu, OSS, Link16 or an LLM API key.
 The user's existing agent invokes a normal program. The optional GUI and Worker

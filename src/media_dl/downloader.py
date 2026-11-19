@@ -19,10 +19,12 @@ def detect_platform(url: str) -> str:
     host = parsed.hostname or ''
     if parsed.scheme != 'https' or parsed.username or parsed.password or parsed.port not in (None, 443):
         raise ValueError('请提供受支持平台的 HTTPS 单帖或视频链接')
+    if host == 'weixin.qq.com' and parsed.path.startswith('/sph/'):
+        return 'wechat_channels'
     for platform, domains in DOMAINS.items():
         if any(host == d or host.endswith('.' + d) for d in domains):
             return platform
-    raise ValueError('当前支持 YouTube、Bilibili、小红书、X、Threads 和 LinkedIn')
+    raise ValueError('当前支持 YouTube、Bilibili、小红书、X、Threads、LinkedIn 和微信视频号')
 
 
 def download(url: str, env: dict, *, outdir=None, audio=False, meta_only=False,
@@ -41,6 +43,9 @@ def download(url: str, env: dict, *, outdir=None, audio=False, meta_only=False,
             post = client.fetch_post(url)
             result = {'meta': metadata(post), 'files': [] if meta_only else
                       client.download(post, url, scratch, quality, audio_only=audio)}
+        elif platform == 'wechat_channels':
+            from .platforms.wechat_channels import download as wechat_download
+            result = wechat_download(url, scratch, env, audio=audio, meta_only=meta_only)
         elif platform == 'x':
             from .platforms.x import download as x_download
             result = x_download(url, scratch, env, audio=audio, meta_only=meta_only,

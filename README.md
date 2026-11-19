@@ -10,7 +10,7 @@ does_not_own:
   - detailed installation procedures or implementation contracts
 read_when:
   - first opening this repository
-last_reviewed: 2026-09-19
+last_reviewed: 2026-11-19
 ---
 
 # lark-media-dl · 万能媒体工作台
@@ -27,7 +27,7 @@ last_reviewed: 2026-09-19
 <a href="https://www.xiaohongshu.com/"><img src="assets/logos/xiaohongshu.svg" width="28" height="28" alt="小红书"></a> <a href="https://www.xiaohongshu.com/">小红书</a> &nbsp;
 <a href="https://x.com/"><img src="assets/logos/x.svg" width="28" height="28" alt="X"></a> <a href="https://x.com/">X</a> &nbsp;
 <a href="https://www.threads.com/"><img src="assets/logos/threads.svg" width="28" height="28" alt="Threads"></a> <a href="https://www.threads.com/">Threads</a> &nbsp;
-<a href="https://www.linkedin.com/"><img src="assets/logos/linkedin.svg" width="28" height="28" alt="LinkedIn"></a> <a href="https://www.linkedin.com/">LinkedIn</a>
+<a href="https://www.linkedin.com/"><img src="assets/logos/linkedin.svg" width="28" height="28" alt="LinkedIn"></a> <a href="https://www.linkedin.com/">LinkedIn</a> &nbsp; <a href="https://channels.weixin.qq.com/">微信视频号</a>
 </p>
 
 ## 从个人下载开始
@@ -53,13 +53,14 @@ python scripts/install_skill.py --agent codex --apply
 
 ```powershell
 .venv/Scripts/python.exe -m media_dl "公开的单条帖子或视频链接" --json
+.venv/Scripts/python.exe -m media_dl "https://weixin.qq.com/sph/<分享码>" --json
 ```
 
 macOS/Linux 将解释器路径替换为 `.venv/bin/python`。支持 `--audio` 提取 MP3、`--meta-only` 查看信息、`--quality 720` 选择清晰度和 `-o` 指定目录。默认文件进入当前用户的 Downloads，同名文件自动避让，不覆盖已有文件。
 
 默认视频下载会把画面和原音轨合为一个 MP4；仅 `--audio` 单独输出 MP3。FFmpeg 不可用或合并后缺少应有音轨时报告失败，不把两个分离文件当作成片交付。
 
-**默认不需要飞书、OSS、大模型 API Key 或后台服务。** Threads 需要自己的 TikHub Key；其他平台按下表及真实下载结果补配置。配置模板是 [.env.example](.env.example)，具体注册和排错由 [安装引导](docs/SOP-010-agent-install.md) 带 Agent 逐项完成。
+**默认不需要飞书、OSS、大模型 API Key 或后台服务。** Threads 和微信视频号需要自己的 TikHub Key；其他平台按下表及真实下载结果补配置。配置模板是 [.env.example](.env.example)，具体注册和排错由 [安装引导](docs/SOP-010-agent-install.md) 带 Agent 逐项完成。
 
 ## 当前支持什么，需要哪些账号
 
@@ -70,6 +71,7 @@ macOS/Linux 将解释器路径替换为 `.venv/bin/python`。支持 `--audio` �
 | 小红书 | 图文正文与图片、视频、可提取音轨、元数据 | TikHub 解析或公开页面路径；部分链接需完整分享参数或本人 Cookie |
 | X | 单条公开推文的**全部媒体**：多视频、图片、动图与混合内容按发帖顺序保存；正文 TXT；有音轨的视频可提取 MP3 | 通过 FxTwitter 解析，无 X API Key；媒体 CDN 走媒体代理；不包含引用推文或整个线程 |
 | Threads | 正文 TXT、图片、图文、视频、动图；有音轨的视频可提取 MP3 | **需要有余额且开通接口权限的 TIKHUB_API_KEY**；无需 Threads Cookie 或 Meta 发帖 Token |
+| 微信视频号 | `weixin.qq.com/sph/…` 视频分享链接 → 可播放 MP4、原声音轨 MP3 或仅查标题、作者和时长。按接口提供的清晰度保存 | 需要有余额并开通视频号详情权限的 `TIKHUB_API_KEY`，无需微信或元宝登录 Cookie |
 | LinkedIn | 单条公开帖的正文 TXT、作者、图片、视频（最高约 720p）；有音轨的视频可提取 MP3 | 无 Key、无需登录；页面走媒体代理（大陆通常需要），不包含 PDF 文档帖、评论区或需登录内容 |
 
 TikHub 是部分平台的解析服务，**不是整个项目唯一依赖**。Python、requests、yt-dlp 和 FFmpeg 负责实际下载与媒体处理。安装脚本处理 Python 依赖，Agent 再根据操作系统、网络与目标平台补齐必要项。

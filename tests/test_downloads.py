@@ -24,7 +24,8 @@ class DownloadTests(unittest.TestCase):
         for url, name in [('https://youtu.be/id', 'youtube'), ('https://b23.tv/id', 'bilibili'),
                           ('https://xhslink.com/id', 'xiaohongshu'), ('https://x.com/u/status/1', 'x'), (URL, 'threads'),
                           ('https://www.linkedin.com/posts/u_slug-activity-7505337342660939776-Az3R', 'linkedin'),
-                          ('https://lnkd.in/abc', 'linkedin')]:
+                          ('https://lnkd.in/abc', 'linkedin'),
+                          ('https://weixin.qq.com/sph/abc', 'wechat_channels')]:
             self.assertEqual(detect_platform(url), name)
         for url in ['https://youtube.com.evil.test/a', 'http://youtube.com/a', 'https://user@x.com/a', 'https://localhost/a']:
             with self.assertRaises(ValueError):
@@ -48,6 +49,19 @@ class DownloadTests(unittest.TestCase):
             result = download(URL, ENV, outdir=target, meta_only=True)
             self.assertEqual(result['meta']['uploader'], 'owner')
             self.assertFalse(target.exists())
+
+    def test_wechat_share_metadata_does_not_download_media(self):
+        url = 'https://weixin.qq.com/sph/AbC123'
+        detail = {'id': 42, 'nickname': '作者', 'title': '测试', 'media': {'duration': 15}}
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch('media_dl.platforms.wechat_channels.fetch_detail', return_value=detail) as fetch, \
+             patch('media_dl.platforms.wechat_channels.fetch_video') as fetch_video:
+            dest = Path(tmp) / 'output'
+            result = download(url + '?from=share', ENV, outdir=dest, meta_only=True)
+            fetch.assert_called_once_with(url, ENV)
+            fetch_video.assert_not_called()
+            self.assertEqual(result['meta'], {'title': '测试', 'uploader': '作者', 'id': '42', 'duration': 15})
+            self.assertFalse(dest.exists())
 
     def test_carousel_order_and_no_cover_substitution(self):
         post = {'carousel_media': [{'image_versions2': {'candidates': [{'url': 'image'}]}},

@@ -25,7 +25,7 @@ last_reviewed: 2026-09-14
 2. 找到用户实际使用的 Agent 配置目录及已有 `media-dl` Skill。Codex 默认共享目录是 `~/.agents/skills`，Claude Code 默认是 `~/.claude/skills`；非默认 profile 必须查宿主配置。Kimi 的目录按已安装版本核对，不猜。
 3. 检查 Python 3.10+、Git。缺失时从 [Python](https://www.python.org/downloads/) 和 [Git](https://git-scm.com/downloads) 获取适合系统的安装方式；仅安装用户需要的组件，不改别的项目环境。Linux 若缺 venv，按发行版安装对应 python-venv 包。
 4. 阅读 `pyproject.toml` 后运行下面的预览，再安装。安装只写仓库的 `.venv`，不依赖作者的私人目录。
-5. 不要求用户先注册所有服务。Threads 才必须走 TikHub；公开 YouTube、B 站、X 视频和 LinkedIn 帖子先尝试无需账号的路径（LinkedIn 页面通常需要媒体代理）。
+5. 不要求用户先注册所有服务。Threads 和微信视频号需要 TikHub；公开 YouTube、B 站、X 视频和 LinkedIn 帖子先尝试无需账号的路径（LinkedIn 页面通常需要媒体代理）。
 
 在仓库根目录：
 
@@ -53,11 +53,11 @@ FFmpeg 用于合并音视频和提取 MP3。优先使用已安装的 FFmpeg，�
 
 只回报“已配置 / 缺失 / 验证通过”，不输出值。密钥不写进命令历史、Git、截图、网页前端、公开日志或 Agent 长期记忆。账号注册、付费和浏览器登录由用户在自己的账号里完成，Agent 给准确入口并检查机械结果。
 
-### Threads / TikHub
+### Threads、微信视频号 / TikHub
 
-去 [TikHub](https://tikhub.io/) 注册自己的账号，按 [官方文档](https://docs.tikhub.io/) 创建 API Key、查看余额并确认 Threads 接口权限。写入 `TIKHUB_API_KEY`。Key 存在不等于接口可用，用用户提供的一条公开 Threads 单帖做真实请求验收。
+去 [TikHub](https://tikhub.io/) 注册自己的账号，按 [官方文档](https://docs.tikhub.io/) 创建 API Key、查看余额并确认目标平台的接口权限。写入 `TIKHUB_API_KEY`。Key 存在不等于接口可用，用用户提供的一条公开帖子做真实请求验收。微信视频号使用 `wechat_channels/v2/fetch_video_detail`，只需 `weixin.qq.com/sph/…` 视频分享短链，无需元宝 Cookie。
 
-默认 `TIKHUB_BASE=https://api.tikhub.dev`；按实际网络也可设为 `https://api.tikhub.io`。只把 Key 交给用户选择的可信 TikHub 地址。解析 API 与媒体文件下载用独立连接，TikHub Key 不发给媒体 CDN。
+Threads 默认 `https://api.tikhub.dev`，微信视频号默认 `https://api.tikhub.io`。可用 `TIKHUB_BASE` 指定适合本机网络的 TikHub 网关。只把 Key 交给用户选择的可信 TikHub 地址。解析 API 与媒体文件下载用独立连接，TikHub Key 不发给媒体 CDN。
 
 不需要 Threads Cookie，也不使用 Meta 发帖 Token。401/403 检查 Key 与接口权限，402 检查余额，429 稍后重试；私密、删除或不可访问帖子不承诺下载。
 

@@ -9,6 +9,7 @@ browser cookies, platform API secret or LLM credential is included.
 Python runtime
 --------------
 requests: Apache-2.0, https://github.com/psf/requests
+wxipad-video: MIT, https://pypi.org/project/wxipad-video/ (WeChat Channels media decoding)
 yt-dlp: Unlicense for its source; distributed builds and optional dependencies
 may carry additional terms. See https://github.com/yt-dlp/yt-dlp#license
 imageio-ffmpeg: BSD-2-Clause wrapper, https://github.com/imageio/imageio-ffmpeg

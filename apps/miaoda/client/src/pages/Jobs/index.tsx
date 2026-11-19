@@ -78,6 +78,7 @@ const PLATFORM_COPY: Record<MediaJob['platform'], string> = {
   x: 'X',
   threads: 'Threads',
   linkedin: 'LinkedIn',
+  wechat_channels: '微信视频号',
 };
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('zh-CN', {
@@ -125,6 +126,7 @@ const detectPlatform = (value: string): string => {
   ) {
     return 'Threads';
   }
+  if (/^https:\/\/weixin\.qq\.com\/sph\//i.test(value.trim())) return '微信视频号';
   if (normalized.includes('linkedin.com') || normalized.includes('lnkd.in')) {
     return 'LinkedIn';
   }
@@ -189,7 +191,7 @@ const JobRow: React.FC<JobRowProps> = ({ job, retryingId, onRetry }) => {
   const metadata: string[] = [
     PLATFORM_COPY[job.platform],
     WORKFLOW_COPY[job.workflow],
-    job.workflow === 'video' && job.platform !== 'threads' && job.platform !== 'linkedin'
+    job.workflow === 'video' && job.platform !== 'threads' && job.platform !== 'linkedin' && job.platform !== 'wechat_channels'
       ? `${job.quality}p`.replace('bestp', '最高画质')
       : '',
     duration ?? '',
@@ -434,7 +436,7 @@ const JobsPage: React.FC = () => {
               粘贴链接，文件在本机完成下载。
             </h2>
             <p className="mt-3 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground">
-              支持 YouTube、Bilibili、小红书、X、Threads 和 LinkedIn。Threads
+              支持 YouTube、Bilibili、小红书、X、Threads、LinkedIn 和微信视频号。Threads
               可保存文字、图片、视频和动图；X 推文的多个视频和图片全部保存；LinkedIn 帖子可保存正文、图片和视频，文件直接进入电脑的 Downloads。
             </p>
           </div>
@@ -549,7 +551,7 @@ const JobsPage: React.FC = () => {
 
               <div className={workflow === 'video' ? '' : 'opacity-45'}>
                 <p className="mb-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                  视频画质
+                  {platformHint === '微信视频号' ? '视频画质（使用源视频）' : '视频画质'}
                 </p>
                 <div
                   className="flex flex-wrap gap-1.5"
@@ -562,7 +564,7 @@ const JobsPage: React.FC = () => {
                       type="button"
                       size="sm"
                       variant={quality === option ? 'secondary' : 'ghost'}
-                      disabled={workflow !== 'video'}
+                      disabled={workflow !== 'video' || platformHint === '微信视频号'}
                       aria-pressed={quality === option}
                       onClick={() => setQuality(option)}
                       className="font-mono tracking-wide"

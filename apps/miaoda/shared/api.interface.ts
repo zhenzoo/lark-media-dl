@@ -4,7 +4,8 @@ export type MediaPlatform =
   | 'xiaohongshu'
   | 'x'
   | 'threads'
-  | 'linkedin';
+  | 'linkedin'
+  | 'wechat_channels';
 
 export type MediaWorkflow = 'video' | 'audio' | 'inspect';
 

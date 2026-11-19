@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [{name = "zhenzoo"}]
-dependencies = ["requests>=2.32,<3", "yt-dlp[default]>=2026.3.17", "imageio-ffmpeg>=0.6,<1"]
+dependencies = ["requests>=2.32,<3", "yt-dlp[default]>=2026.3.17", "imageio-ffmpeg>=0.6,<1", "wxipad-video==0.1.1"]
 
 [project.optional-dependencies]
 oss = ["oss2>=2.19,<3"]

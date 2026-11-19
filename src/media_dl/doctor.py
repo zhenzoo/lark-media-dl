@@ -19,12 +19,18 @@ def inspect(env, platform=None, network=False):
         except importlib.metadata.PackageNotFoundError:
             version = None
         add(name, version, version or 'missing', name == 'requests' or platform in (None, 'youtube', 'bilibili', 'x', 'linkedin'))
+    if platform == 'wechat_channels':
+        try:
+            decoder = importlib.metadata.version('wxipad-video')
+        except importlib.metadata.PackageNotFoundError:
+            decoder = None
+        add('wxipad-video', decoder, decoder or 'missing; reinstall lark-media-dl')
     ffmpeg = ffmpeg_path(env)
     add('ffmpeg', ffmpeg, 'available' if ffmpeg else 'missing; install FFmpeg or imageio-ffmpeg')
     js = env.get('MEDIA_DL_JS_RUNTIME') or next((x for x in ('deno', 'node', 'bun', 'qjs') if shutil.which(x)), None)
     add('youtube-js', js, (js + '; verify version with yt-dlp docs') if js else 'missing', platform == 'youtube')
     key = env.get('TIKHUB_API_KEY', '').strip()
-    add('tikhub-key', key, 'configured; permission and balance require a real request' if key else 'missing', platform == 'threads')
+    add('tikhub-key', key, 'configured; permission and balance require a real request' if key else 'missing', platform in ('threads', 'wechat_channels'))
     add('proxy', True, 'configured' if env.get('MEDIA_DL_PROXY') or env.get('HTTPS_PROXY') else 'direct connection', False)
     add('cookies', True, 'configured' if any(k.endswith('_COOKIES') and v for k, v in env.items()) else 'not configured; optional for public content', False)
     add('config-location', True, str(config_dir() / '.env'), False)
@@ -33,6 +39,7 @@ def inspect(env, platform=None, network=False):
         urls = {'youtube': 'https://www.youtube.com', 'bilibili': 'https://www.bilibili.com',
                 'x': 'https://api.fxtwitter.com', 'xiaohongshu': 'https://www.xiaohongshu.com',
                 'threads': env.get('TIKHUB_BASE', 'https://api.tikhub.dev'),
+                'wechat_channels': env.get('TIKHUB_BASE') or 'https://api.tikhub.io',
                 'linkedin': 'https://www.linkedin.com'}
         for name, url in urls.items():
             if platform and name != platform:
@@ -41,7 +48,7 @@ def inspect(env, platform=None, network=False):
                 with requests.Session() as session:
                     session.trust_env = False
                     proxy = env.get('MEDIA_DL_PROXY') or env.get('HTTPS_PROXY')
-                    if proxy and name != 'threads':
+                    if proxy and name not in ('threads', 'wechat_channels'):
                         session.proxies.update(http=proxy, https=proxy)
                     response = session.get(url, timeout=(5, 10), stream=True)
                     code = response.status_code
@@ -54,7 +61,7 @@ def inspect(env, platform=None, network=False):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--platform', choices=['youtube', 'bilibili', 'x', 'xiaohongshu', 'threads', 'linkedin'])
+    parser.add_argument('--platform', choices=['youtube', 'bilibili', 'x', 'xiaohongshu', 'threads', 'linkedin', 'wechat_channels'])
     parser.add_argument('--env-file')
     parser.add_argument('--network', action='store_true')
     parser.add_argument('--json', action='store_true')

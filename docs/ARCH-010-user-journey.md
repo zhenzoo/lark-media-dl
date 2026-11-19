@@ -82,6 +82,7 @@ flowchart TD
 - `platforms/bilibili.py`：B 站公开下载所需匿名票据及本地缓存；不替代账号权限。
 - `platforms/x.py`：通过 FxTwitter 解析整条推文，按发帖顺序保存全部视频、图片、动图与正文；音频模式对每个视频各提取 MP3。
 - `platforms/xiaohongshu.py`：分享链接解析、TikHub/公开页面详情、图文/视频保存和音频提取。
+- `platforms/wechat_channels.py`：用 TikHub 解析视频号分享短链，取得同次返回的媒体地址与配套密钥，下载并验证视频或提取 MP3。
 - `platforms/threads.py`：TikHub 精确定位目标帖，处理纯文字、图集、视频和动图；API 与媒体连接分离，验证每个媒体地址。
 - `platforms/linkedin.py`：免登录抓取公开帖页面，只解析主帖块（排除相关帖与评论）得到正文、作者、图片；视频交 `ytdlp.py`，音频从成片 MP4 提取并核验音轨。
 
